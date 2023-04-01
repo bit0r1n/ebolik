@@ -1,6 +1,9 @@
-import asyncdispatch, options, tables, httpclient, nre, strutils, unicode
+import std/[
+  asyncdispatch, options, tables,
+  httpclient, nre, strutils, unicode
+]
 import dimscord, pixie, pixie/fileformats/png
-import images
+import ./images
 
 let
   slashCommands* = @[
@@ -52,14 +55,31 @@ let
     description: "Enter to admin control panel"
   )
 
+proc authorAvatarUrl(i: Interaction): string =
+  result = if i.user.isSome: i.user.get().avatarUrl(size = 512)
+    else: Guild(id: i.guild_id.get).guildAvatarUrl(i.member.get)
+
 proc gtaSlash*(i: Interaction, s: Shard, discord: DiscordClient) {.async.} =
   let
     data = i.data.get
     text = data.options["text"].str
     imageOption = data.options.getOrDefault("image")
     imageUrl = if imageOption.kind == acotNothing:
-      s.cache.guilds[i.guild_id.get].guildAvatarUrl(i.member.get)
+      i.authorAvatarUrl
     else: data.resolved.attachments[data.options["image"].aval].url
+    
+  if permAttachFiles notin i.app_permissions:
+    await discord.api.createInteractionResponse(
+      i.id, i.token,
+      InteractionResponse(
+        kind: irtChannelMessageWithSource,
+        data: some InteractionCallbackDataMessage(
+          content: "yrJleNJlacTNk, MHe 6E3 TPAXAHNR nPAB KAPAKyJlNs",
+          flags: { mfEphemeral }
+        )
+      )
+    )
+    return
 
   if not imageUrl.contains(re"\.(png|jpe?g|gif)"):
     await discord.api.createInteractionResponse(
@@ -101,13 +121,14 @@ proc gtaSlash*(i: Interaction, s: Shard, discord: DiscordClient) {.async.} =
   )
 
   try:
+    let file = gta(unicode.toUpper(fText), image).encodePng()
     discard await discord.api.editWebhookMessage(
       discord.shards[0].user.id, i.token, "@original",
       attachments = @[
         Attachment(
           id: "0",
           filename: "gta.png",
-          file: gta(unicode.toUpper(fText), image).encodePng()
+          file: file
         )
       ]
     )
@@ -127,6 +148,19 @@ proc demotivatorSlash*(i: Interaction, s: Shard, discord: DiscordClient) {.async
     imageUrl = if imageOption.kind == acotNothing:
       s.cache.guilds[i.guild_id.get].guildAvatarUrl(i.member.get)
     else: data.resolved.attachments[data.options["image"].aval].url
+
+  if permAttachFiles notin i.app_permissions:
+    await discord.api.createInteractionResponse(
+      i.id, i.token,
+      InteractionResponse(
+        kind: irtChannelMessageWithSource,
+        data: some InteractionCallbackDataMessage(
+          content: "их мысли\n\nблять где права на пикчи",
+          flags: { mfEphemeral }
+        )
+      )
+    )
+    return
 
   if not imageUrl.contains(re"\.(png|jpe?g|gif)"):
     await discord.api.createInteractionResponse(
@@ -154,13 +188,14 @@ proc demotivatorSlash*(i: Interaction, s: Shard, discord: DiscordClient) {.async
   )
 
   try:
+    let file = demotivator(topText, bottomText, image).encodePng()
     discard await discord.api.editWebhookMessage(
       discord.shards[0].user.id, i.token, "@original",
       attachments = @[
         Attachment(
           id: "0",
-          filename: "gta.png",
-          file: demotivator(topText, bottomText, image).encodePng()
+          filename: "demotivator.png",
+          file: file
         )
       ]
     )
@@ -171,6 +206,18 @@ proc demotivatorSlash*(i: Interaction, s: Shard, discord: DiscordClient) {.async
     )
 
 proc admSlash*(i: Interaction, s: Shard, discord: DiscordClient) {.async.} =
+  if permKickMembers notin i.app_permissions:
+    await discord.api.createInteractionResponse(
+      i.id, i.token,
+      InteractionResponse(
+        kind: irtChannelMessageWithSource,
+        data: some InteractionCallbackDataMessage(
+          content: "ладно, иди наху, без админки будешь",
+          flags: { mfEphemeral }
+        )
+      )
+    )
+    return
   try:
     await discord.api.removeGuildMember(i.guild_id.get, i.member.get().user.id, "+admin")
   except:

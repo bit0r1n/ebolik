@@ -1,6 +1,9 @@
-import os, options, asyncdispatch, tables, sequtils, strutils
+import std/[
+  os, options, asyncdispatch,
+  tables, sequtils, strutils
+]
 import dimscord
-import commands
+import ./commands
 
 type
   RoleReactionEntity = object

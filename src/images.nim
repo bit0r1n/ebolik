@@ -1,4 +1,5 @@
-import pixie, unicode
+import std/unicode
+import pixie
 
 const TNRFont = "fonts/times-new-roman.ttf"
 const ArialFont = "fonts/Arial.ttf"

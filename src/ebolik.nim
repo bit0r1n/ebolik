@@ -18,6 +18,17 @@ proc onReady(s: Shard, r: Ready) {.event(discord).} =
     kind: atPlaying
   ), status = "online")
 
+proc messageCreate(s: Shard, m: Message) {.event(discord).} =
+  if m.kind == mtUserGuildBoost and getEnv("BOOST_CHANNEL_ID") != "":
+    discard await discord.api.sendMessage(m.channel_id, "<@" & m.author.id & ">",
+      files = @[
+        DiscordFile(
+          name: "thx.mp3",
+          body: readFile("sounds/thx.mp3")
+        )
+      ]
+    )
+
 waitFor discord.startSession(
   gateway_intents = { giGuilds, giGuildMessages, giGuildMessageReactions },
   cache_users = false, guild_subscriptions = false,

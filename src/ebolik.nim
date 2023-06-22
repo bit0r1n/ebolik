@@ -18,6 +18,12 @@ proc onReady(s: Shard, r: Ready) {.event(discord).} =
     kind: atPlaying
   ), status = "online")
 
+  discard await discord.api.bulkOverwriteApplicationCommands(r.user.id, slashCommands)
+  if getEnv("DEBUG_GUILD_ID") != "":
+    discard await discord.api.bulkOverwriteApplicationCommands(r.user.id, slashCommands,
+      guild_id = getEnv("DEBUG_GUILD_ID")
+    )
+
 proc messageCreate(s: Shard, m: Message) {.event(discord).} =
   if m.kind == mtUserGuildBoost and getEnv("BOOST_CHANNEL_ID") != "":
     discard await discord.api.sendMessage(m.channel_id, "<@" & m.author.id & ">",

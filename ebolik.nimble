@@ -12,4 +12,5 @@ binDir        = "bin"
 # Dependencies
 
 requires "nim >= 1.6.10"
-requires "dimscord#head, pixie"
+requires "pixie"
+requires "https://github.com/bit0r1n/dimscord#media-channel"

@@ -6,6 +6,6 @@ RUN apk add --no-cache pcre-dev
 WORKDIR /ebolik
 COPY . .
 
-RUN ["nimble", "-y", "--mm:refc", "-d:release", "--opt:speed", "-d:ssl", "-d:discordCompress", "build"]
+RUN ["nimble", "-y", "--mm:refc", "-d:release", "--opt:speed", "-d:ssl", "build"]
 
 ENTRYPOINT [ "./bin/ebolik" ]

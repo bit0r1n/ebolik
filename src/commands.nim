@@ -57,7 +57,7 @@ let
 
 proc authorAvatarUrl(i: Interaction): string =
   result = if i.user.isSome: i.user.get().avatarUrl(size = 512)
-    else: Guild(id: i.guild_id.get).guildAvatarUrl(i.member.get)
+    else: Guild(id: i.guild_id.get).memberAvatarUrl(i.member.get)
 
 proc gtaSlash*(i: Interaction, s: Shard, discord: DiscordClient) =
   let
@@ -146,7 +146,7 @@ proc demotivatorSlash*(i: Interaction, s: Shard, discord: DiscordClient) =
     bottomText = if bottomTextOption.kind == acotNothing: "" else: data.options["bottom"].str
     imageOption = data.options.getOrDefault("image")
     imageUrl = if imageOption.kind == acotNothing:
-      s.cache.guilds[i.guild_id.get].guildAvatarUrl(i.member.get)
+      s.cache.guilds[i.guild_id.get].memberAvatarUrl(i.member.get)
     else: data.resolved.attachments[data.options["image"].aval].url
 
   if permAttachFiles notin i.app_permissions:

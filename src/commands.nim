@@ -97,7 +97,23 @@ proc gtaSlash*(i: Interaction, s: Shard, discord: DiscordClient) =
   let
     httpClient = newAsyncHttpClient()
     rawImage = waitFor httpClient.getContent(imageUrl)
+
+  var image: Image
+
+  try:
     image = decodeImage(rawImage)
+  except:
+    asyncCheck discord.api.createInteractionResponse(
+      i.id, i.token,
+      InteractionResponse(
+        kind: irtChannelMessageWithSource,
+        data: some InteractionCallbackDataMessage(
+          content: "HeroD9N, TBON fANJl fAJlbLL|NBKA",
+          flags: { mfEphemeral }
+        )
+      )
+    )
+    return
 
   let fText = text.findAll(re"(*UTF8)[a-zA-Zа-яА-Я0-9!#\(\),\-\.\?ёЁ¶ЇЄ ]").join("")
   if fText.len == 0:
@@ -178,7 +194,23 @@ proc demotivatorSlash*(i: Interaction, s: Shard, discord: DiscordClient) =
   let
     httpClient = newAsyncHttpClient()
     rawImage = waitFor httpClient.getContent(imageUrl)
+
+  var image: Image
+
+  try:
     image = decodeImage(rawImage)
+  except:
+    asyncCheck discord.api.createInteractionResponse(
+      i.id, i.token,
+      InteractionResponse(
+        kind: irtChannelMessageWithSource,
+        data: some InteractionCallbackDataMessage(
+          content: "их файлы\n\nблять что это",
+          flags: { mfEphemeral }
+        )
+      )
+    )
+    return
 
   asyncCheck discord.api.createInteractionResponse(
     i.id, i.token,

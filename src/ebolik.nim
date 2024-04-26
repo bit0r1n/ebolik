@@ -1,5 +1,5 @@
 import std/[os, options, asyncdispatch, strutils, tables]
-import dimscord
+import dimscord, boticordnim
 import commands, helpers
 
 let discord = newDiscordClient(getEnv("DISCORD_TOKEN"))
@@ -40,24 +40,24 @@ proc messageCreate(s: Shard, m: Message) {.event(discord).} =
       ]
     )
 
-# proc intervalStats(): void =
-#   if getEnv("BOTICORD_TOKEN") != "":
-#     var
-#       guildsCount = 0
-#       botId = ""
-#     for s in discord.shards.values:
-#       if not s.ready: return
-#       guildsCount += s.cache.guilds.len
-#       botId = s.user.id
-#
-#     if guildsCount != 0:
-#       try:
-#         discard waitFor postBotStats(token = getEnv("BOTICORD_TOKEN"), id = botId,
-#           servers = some guildsCount)
-#       except:
-#         discard
-#
-# discard runInterval(intervalStats, 10 * 60_000)
+proc intervalStats(): void =
+  if getEnv("BOTICORD_TOKEN") != "":
+    var
+      guildsCount = 0
+      botId = ""
+    for s in discord.shards.values:
+      if not s.ready: return
+      guildsCount += s.cache.guilds.len
+      botId = s.user.id
+
+    if guildsCount != 0:
+      try:
+        discard waitFor postBotStats(token = getEnv("BOTICORD_TOKEN"), id = botId,
+          servers = some guildsCount)
+      except:
+        discard
+
+discard runInterval(intervalStats, 10 * 60_000)
 
 waitFor discord.startSession(
   gateway_intents = { giGuilds, giGuildMessages, giGuildMessageReactions },

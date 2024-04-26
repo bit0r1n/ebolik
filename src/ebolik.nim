@@ -1,15 +1,20 @@
 import std/[os, options, asyncdispatch, strutils]
 import dimscord
-import ./commands
+import commands
 
 let discord = newDiscordClient(getEnv("DISCORD_TOKEN"))
 
 proc interactionCreate(s: Shard, i: Interaction) {.event(discord).} =
   let data = i.data.get
-  case data.name:
-  of "gta": gtaSlash(i, s, discord)
-  of "demotivator": demotivatorSlash(i, s, discord)
-  of "adm": await admSlash(i, s, discord)
+
+  try:
+    case data.name:
+    of "gta": await gtaSlash(i, s, discord)
+    of "demotivator": await demotivatorSlash(i, s, discord)
+    of "adm": await admSlash(i, s, discord)
+  except CatchableError as e:
+    if "Unknown interaction" notin e.msg: echo e.msg
+    discard
 
 proc onReady(s: Shard, r: Ready) {.event(discord).} =
   echo "Ready as: " & $r.user
@@ -18,15 +23,15 @@ proc onReady(s: Shard, r: Ready) {.event(discord).} =
     kind: atPlaying
   ), status = "online")
 
-  discard await discord.api.bulkOverwriteApplicationCommands(r.user.id, slashCommands)
+  asyncCheck discord.api.bulkOverwriteApplicationCommands(r.user.id, slashCommands)
   if getEnv("DEBUG_GUILD_ID") != "":
-    discard await discord.api.bulkOverwriteApplicationCommands(r.user.id, slashCommands,
+    asyncCheck discord.api.bulkOverwriteApplicationCommands(r.user.id, slashCommands,
       guild_id = getEnv("DEBUG_GUILD_ID")
     )
 
 proc messageCreate(s: Shard, m: Message) {.event(discord).} =
-  if m.kind == mtUserGuildBoost and getEnv("BOOST_CHANNEL_ID") != "":
-    discard await discord.api.sendMessage(m.channel_id, "<@" & m.author.id & ">",
+  if m.kind == mtUserGuildBoost and m.channel_id == getEnv("BOOST_CHANNEL_ID"):
+    asyncCheck discord.api.sendMessage(m.channel_id, "<@" & m.author.id & ">",
       files = @[
         DiscordFile(
           name: "thx.mp3",

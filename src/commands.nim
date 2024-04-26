@@ -3,7 +3,7 @@ import std/[
   httpclient, nre, strutils, unicode
 ]
 import dimscord, pixie, pixie/fileformats/png
-import ./images
+import images
 
 let
   slashCommands* = @[
@@ -59,7 +59,7 @@ proc authorAvatarUrl(i: Interaction): string =
   result = if i.user.isSome: i.user.get().avatarUrl(size = 512)
     else: Guild(id: i.guild_id.get).memberAvatarUrl(i.member.get)
 
-proc gtaSlash*(i: Interaction, s: Shard, discord: DiscordClient) =
+proc gtaSlash*(i: Interaction, s: Shard, discord: DiscordClient) {.async.} =
   let
     data = i.data.get
     text = data.options["text"].str
@@ -67,9 +67,9 @@ proc gtaSlash*(i: Interaction, s: Shard, discord: DiscordClient) =
     imageUrl = if imageOption.kind == acotNothing:
       i.authorAvatarUrl
     else: data.resolved.attachments[data.options["image"].aval].url
-    
+
   if permAttachFiles notin i.app_permissions:
-    asyncCheck discord.api.createInteractionResponse(
+    await discord.api.createInteractionResponse(
       i.id, i.token,
       InteractionResponse(
         kind: irtChannelMessageWithSource,
@@ -82,7 +82,7 @@ proc gtaSlash*(i: Interaction, s: Shard, discord: DiscordClient) =
     return
 
   if not imageUrl.contains(re"\.(png|jpe?g|gif)"):
-    asyncCheck discord.api.createInteractionResponse(
+    await discord.api.createInteractionResponse(
       i.id, i.token,
       InteractionResponse(
         kind: irtChannelMessageWithSource,
@@ -94,47 +94,35 @@ proc gtaSlash*(i: Interaction, s: Shard, discord: DiscordClient) =
     )
     return
 
+  await discord.api.createInteractionResponse(
+    i.id, i.token,
+    InteractionResponse(
+      kind: irtDeferredChannelMessageWithSource
+    )
+  )
+
   let
     httpClient = newAsyncHttpClient()
-    rawImage = waitFor httpClient.getContent(imageUrl)
+    rawImage = await httpClient.getContent(imageUrl)
 
   var image: Image
 
   try:
     image = decodeImage(rawImage)
   except:
-    asyncCheck discord.api.createInteractionResponse(
-      i.id, i.token,
-      InteractionResponse(
-        kind: irtChannelMessageWithSource,
-        data: some InteractionCallbackDataMessage(
-          content: "HeroD9N, TBON fANJl fAJlbLL|NBKA",
-          flags: { mfEphemeral }
-        )
-      )
+    asyncCheck discord.api.editWebhookMessage(
+      discord.shards[0].user.id, i.token, "@original",
+      content = some "HeroD9N, TBON fANJl fAJlbLL|NBKA"
     )
     return
 
   let fText = text.findAll(re"(*UTF8)[a-zA-Zа-яА-Я0-9!#\(\),\-\.\?ёЁ¶ЇЄ ]").join("")
   if fText.len == 0:
-    asyncCheck discord.api.createInteractionResponse(
-      i.id, i.token,
-      InteractionResponse(
-        kind: irtChannelMessageWithSource,
-        data: some InteractionCallbackDataMessage(
-          content: "TPAXAHNE TBOErO TEKCTOB OKOJlO rPyNTA",
-          flags: { mfEphemeral }
-        )
-      )
+    asyncCheck discord.api.editWebhookMessage(
+      discord.shards[0].user.id, i.token, "@original",
+      content = some "TPAXAHNE TBOErO TEKCTOB OKOJlO rPyNTA"
     )
     return
-
-  asyncCheck discord.api.createInteractionResponse(
-    i.id, i.token,
-    InteractionResponse(
-      kind: irtDeferredChannelMessageWithSource
-    )
-  )
 
   try:
     let file = gta(unicode.toUpper(fText), image).encodePng()
@@ -148,13 +136,15 @@ proc gtaSlash*(i: Interaction, s: Shard, discord: DiscordClient) =
         )
       ]
     )
-  except CatchableError:
+  except:
     asyncCheck discord.api.editWebhookMessage(
       discord.shards[0].user.id, i.token, "@original",
       content = some "не получилось не фортануло)"
     )
 
-proc demotivatorSlash*(i: Interaction, s: Shard, discord: DiscordClient) =
+  return
+
+proc demotivatorSlash*(i: Interaction, s: Shard, discord: DiscordClient) {.async.} =
   let
     data = i.data.get
     topText = data.options["top"].str
@@ -166,7 +156,7 @@ proc demotivatorSlash*(i: Interaction, s: Shard, discord: DiscordClient) =
     else: data.resolved.attachments[data.options["image"].aval].url
 
   if permAttachFiles notin i.app_permissions:
-    asyncCheck discord.api.createInteractionResponse(
+    await discord.api.createInteractionResponse(
       i.id, i.token,
       InteractionResponse(
         kind: irtChannelMessageWithSource,
@@ -179,7 +169,7 @@ proc demotivatorSlash*(i: Interaction, s: Shard, discord: DiscordClient) =
     return
 
   if not imageUrl.contains(re"\.(png|jpe?g|gif)"):
-    asyncCheck discord.api.createInteractionResponse(
+    await discord.api.createInteractionResponse(
       i.id, i.token,
       InteractionResponse(
         kind: irtChannelMessageWithSource,
@@ -191,33 +181,27 @@ proc demotivatorSlash*(i: Interaction, s: Shard, discord: DiscordClient) =
     )
     return
 
+  await discord.api.createInteractionResponse(
+    i.id, i.token,
+    InteractionResponse(
+      kind: irtDeferredChannelMessageWithSource
+    )
+  )
+
   let
     httpClient = newAsyncHttpClient()
-    rawImage = waitFor httpClient.getContent(imageUrl)
+    rawImage = await httpClient.getContent(imageUrl)
 
   var image: Image
 
   try:
     image = decodeImage(rawImage)
   except:
-    asyncCheck discord.api.createInteractionResponse(
-      i.id, i.token,
-      InteractionResponse(
-        kind: irtChannelMessageWithSource,
-        data: some InteractionCallbackDataMessage(
-          content: "их файлы\n\nблять что это",
-          flags: { mfEphemeral }
-        )
-      )
+    asyncCheck discord.api.editWebhookMessage(
+      discord.shards[0].user.id, i.token, "@original",
+      content = some "их файлы\n\nблять что это"
     )
     return
-
-  asyncCheck discord.api.createInteractionResponse(
-    i.id, i.token,
-    InteractionResponse(
-      kind: irtDeferredChannelMessageWithSource
-    )
-  )
 
   try:
     let file = demotivator(topText, bottomText, image).encodePng()
@@ -250,18 +234,21 @@ proc admSlash*(i: Interaction, s: Shard, discord: DiscordClient) {.async.} =
       )
     )
     return
+
+  await discord.api.createInteractionResponse(
+    i.id, i.token,
+    InteractionResponse(
+      kind: irtDeferredChannelMessageWithSource
+    )
+  )
+
   try:
     await discord.api.removeGuildMember(i.guild_id.get, i.member.get().user.id, "+admin")
   except CatchableError:
     discard
   finally:
     discard await discord.api.sendMessage(i.channel_id.get, "+admin " & i.member.get().user.username)
-    await discord.api.createInteractionResponse(
-      i.id, i.token,
-      InteractionResponse(
-        kind: irtChannelMessageWithSource,
-        data: some InteractionCallbackDataMessage(
-          content: "xd"
-        )
-      )
+    asyncCheck discord.api.editWebhookMessage(
+      discord.shards[0].user.id, i.token, "@original",
+      content = some "xd"
     )

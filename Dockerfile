@@ -8,4 +8,4 @@ COPY . .
 
 RUN ["nimble", "-y", "build"]
 
-RUN [ "./bin/ebolik" ]
+CMD [ "./bin/ebolik" ]

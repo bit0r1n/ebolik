@@ -152,7 +152,7 @@ proc demotivatorSlash*(i: Interaction, s: Shard, discord: DiscordClient) {.async
     bottomText = if bottomTextOption.kind == acotNothing: "" else: data.options["bottom"].str
     imageOption = data.options.getOrDefault("image")
     imageUrl = if imageOption.kind == acotNothing:
-      s.cache.guilds[i.guild_id.get].memberAvatarUrl(i.member.get)
+      i.authorAvatarUrl
     else: data.resolved.attachments[data.options["image"].aval].url
 
   if permAttachFiles notin i.app_permissions:

@@ -41,21 +41,19 @@ proc messageCreate(s: Shard, m: Message) {.event(discord).} =
     )
 
 proc intervalStats(): void =
-  if getEnv("BOTICORD_TOKEN") != "":
-    var
-      guildsCount = 0
-      botId = ""
-    for s in discord.shards.values:
-      if not s.ready: return
-      guildsCount += s.cache.guilds.len
-      botId = s.user.id
+  if getEnv("BOTICORD_TOKEN") == "": return
+  try:
+    let
+      application = await discord.api.getCurrentApplication()
+      appId = application.id
+      optionGuildCount = application.approximateGuildCount
 
-    if guildsCount != 0:
-      try:
-        discard waitFor postBotStats(token = getEnv("BOTICORD_TOKEN"), id = botId,
-          servers = some guildsCount)
-      except:
-        discard
+    if optionGuildCount.isNone() or optionGuildCount.get() == 0: return
+    
+    discard waitFor postBotStats(token = getEnv("BOTICORD_TOKEN"), id = appId,
+      servers = some optionGuildCount.get())
+  except:
+    discard
 
 discard runInterval(intervalStats, 10 * 60_000)
 

@@ -44,12 +44,12 @@ proc intervalStats(): void =
   if getEnv("BOTICORD_TOKEN") == "": return
   try:
     let
-      application = await discord.api.getCurrentApplication()
+      application = waitFor discord.api.getCurrentApplication()
       appId = application.id
       optionGuildCount = application.approximateGuildCount
 
     if optionGuildCount.isNone() or optionGuildCount.get() == 0: return
-    
+
     discard waitFor postBotStats(token = getEnv("BOTICORD_TOKEN"), id = appId,
       servers = some optionGuildCount.get())
   except:

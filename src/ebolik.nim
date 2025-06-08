@@ -1,4 +1,4 @@
-import std/[os, options, asyncdispatch, strutils, tables]
+import os, options, asyncdispatch, strutils
 import dimscord, boticordnim
 import commands, helpers
 

@@ -116,7 +116,7 @@ proc gtaSlash*(i: Interaction, s: Shard, discord: DiscordClient) {.async.} =
     )
     return
 
-  let fText = text.findAll(re"(*UTF8)[a-zA-Zа-яА-Я0-9!#\(\),\-\.\?ёЁ¶ЇЄ ]").join("")
+  let fText = text.findAll(re"(*UTF8)[a-zA-Zа-яА-Я0-9!#\(\),\-\.\?ёЁ¶ЇЄ\xA9\xAE\x{2000}-\x{3300}\x{1F000}-\x{1FBFF} ]").join("")
   if fText.len == 0:
     asyncCheck discord.api.editWebhookMessage(
       discord.shards[0].user.id, i.token, "@original",

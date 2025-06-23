@@ -1,7 +1,7 @@
-FROM nimlang/nim:2.0.4-alpine
+FROM nimlang/nim:2.2.4-ubuntu-regular
 
-RUN apk update
-RUN apk add --no-cache pcre-dev
+RUN apt update
+RUN apt install -y libpcre3 libpcre3-dev
 
 WORKDIR /ebolik
 COPY . .

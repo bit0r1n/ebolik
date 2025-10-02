@@ -101,10 +101,10 @@ proc gtaSlash*(i: Interaction, s: Shard, discord: DiscordClient) {.async.} =
     )
   )
 
-  let
-    httpClient = newAsyncHttpClient()
-    rawImage = await httpClient.getContent(imageUrl)
-
+  let httpClient = newAsyncHttpClient()
+  defer: httpClient.close()
+  
+  let rawImage = await httpClient.getContent(imageUrl)
   var image: Image
 
   try:
@@ -136,7 +136,8 @@ proc gtaSlash*(i: Interaction, s: Shard, discord: DiscordClient) {.async.} =
         )
       ]
     )
-  except:
+  except CatchableError as e:
+    echo "[gta] Error: ", e.msg
     asyncCheck discord.api.editWebhookMessage(
       discord.shards[0].user.id, i.token, "@original",
       content = some "не получилось не фортануло)"
@@ -188,10 +189,10 @@ proc demotivatorSlash*(i: Interaction, s: Shard, discord: DiscordClient) {.async
     )
   )
 
-  let
-    httpClient = newAsyncHttpClient()
-    rawImage = await httpClient.getContent(imageUrl)
-
+  let httpClient = newAsyncHttpClient()
+  defer: httpClient.close()
+  
+  let rawImage = await httpClient.getContent(imageUrl)
   var image: Image
 
   try:
@@ -215,7 +216,8 @@ proc demotivatorSlash*(i: Interaction, s: Shard, discord: DiscordClient) {.async
         )
       ]
     )
-  except CatchableError:
+  except CatchableError as e:
+    echo "[demotivator] Error: ", e.msg
     asyncCheck discord.api.editWebhookMessage(
       discord.shards[0].user.id, i.token, "@original",
       content = some "не получилось не фортануло)"

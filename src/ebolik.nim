@@ -59,7 +59,6 @@ discard runInterval(intervalStats, 10 * 60_000)
 
 waitFor discord.startSession(
   gateway_intents = { giGuilds, giGuildMessages, giGuildMessageReactions },
-  cache_users = false, guild_subscriptions = false,
-  cache_guild_channels = false, cache_dm_channels = false,
+  cache_users = false, cache_guild_channels = false, cache_dm_channels = false,
   max_message_size = 0, large_message_threshold = 0
 )

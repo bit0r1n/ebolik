@@ -40,7 +40,7 @@ proc messageCreate(s: Shard, m: Message) {.event(discord).} =
       ]
     )
 
-proc intervalStats(): void =
+proc intervalStats() {.async.} =
   if getEnv("BOTICORD_TOKEN") == "": return
   try:
     let
@@ -50,7 +50,7 @@ proc intervalStats(): void =
 
     if optionGuildCount.isNone() or optionGuildCount.get() == 0: return
 
-    discard waitFor postBotStats(token = getEnv("BOTICORD_TOKEN"), id = appId,
+    asyncCheck postBotStats(token = getEnv("BOTICORD_TOKEN"), id = appId,
       servers = some optionGuildCount.get())
   except:
     discard
@@ -60,5 +60,5 @@ discard runInterval(intervalStats, 10 * 60_000)
 waitFor discord.startSession(
   gateway_intents = { giGuilds, giGuildMessages, giGuildMessageReactions },
   cache_users = false, cache_guild_channels = false, cache_dm_channels = false,
-  max_message_size = 0, large_message_threshold = 0
+  max_message_size = 0, large_message_threshold = 0, content_intent = false
 )

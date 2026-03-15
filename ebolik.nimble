@@ -12,4 +12,4 @@ binDir        = "bin"
 # Dependencies
 
 requires "nim >= 1.6.10"
-requires "pixie, dimscord#head", "https://github.com/bit0r1n/boticordnim#head"
+requires "pixie, dimscord == 1.8.0", "https://github.com/bit0r1n/boticordnim#1.0.5"

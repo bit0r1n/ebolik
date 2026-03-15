@@ -1,6 +1,6 @@
 import asyncdispatch
 
-proc runInterval*(cb: proc, interval: int): proc() =
+proc runInterval*(cb: proc(): Future[void], interval: int): proc() =
   var stop_run = false
 
   proc clearInterval() =
@@ -9,7 +9,7 @@ proc runInterval*(cb: proc, interval: int): proc() =
   proc runIntervalLoop() {.async.} =
     while not(stop_run):
       await sleepAsync(interval)
-      cb()
+      await cb()
 
   asyncCheck runIntervalLoop()
 

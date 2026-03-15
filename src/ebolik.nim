@@ -44,7 +44,7 @@ proc intervalStats() {.async.} =
   if getEnv("BOTICORD_TOKEN") == "": return
   try:
     let
-      application = waitFor discord.api.getCurrentApplication()
+      application = await discord.api.getCurrentApplication()
       appId = application.id
       optionGuildCount = application.approximateGuildCount
 
